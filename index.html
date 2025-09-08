@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Flashcard Từ Vựng EPS-TOPIK</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f7f7f7;
+    }
+    .flashcard {
+      width: 300px;
+      height: 200px;
+      perspective: 1000px;
+      margin-bottom: 20px;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+    }
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background: white;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .back {
+      transform: rotateY(180deg);
+      background: #ffe6b3;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #555;
+    }
+    #wordList {
+      max-width: 600px;
+      margin-top: 20px;
+      display: none;
+      text-align: left;
+    }
+    #wordList ul {
+      list-style: none;
+      padding: 0;
+    }
+    #wordList li {
+      padding: 5px 0;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="flashcard" id="flashcard">
+    <div class="card" id="card">
+      <div class="front" id="front">장 도리</div>
+      <div class="back" id="back">Búa Nhổ Đinh</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn">&lt;</button>
+    <button id="flipBtn">Flip</button>
+    <button id="nextBtn">&gt;</button>
+    <button id="showAllBtn">Show All</button>
+  </div>
+
+  <div id="wordList"></div>
+
+  <script>
+    const words = [
+      // 📖 Cột 1
+      {word:"장 도리", meaning:"Búa Nhổ Đinh"},
+      {word:"풀다", meaning:"Tháo"},
+      {word:"스패너", meaning:"Cờ Lê"},
+      {word:"못", meaning:"Đinh"},
+      {word:"방타", meaning:"Nổ"},
+      {word:"회사", meaning:"Công Ty"},
+      {word:"인간", meaning:"Con Người"},
+      {word:"멍겅", meaning:"Ngơ Lơ"},
+      {word:"잘다", meaning:"Cắt"},
+      {word:"절단하다", meaning:"Cắt"},
+      {word:"작동하다", meaning:"Vận Hành"},
+      {word:"결정하다", meaning:"Quyết Định"},
+      {word:"빚기", meaning:"Mượn"},
+      {word:"냉장고", meaning:"Tủ Lạnh"},
+      {word:"공장히", meaning:"Rất, vô cùng"},
+      {word:"반드시", meaning:"Nhất Định"},
+      {word:"꼭", meaning:"Nhất Định"},
+      {word:"도저히", meaning:"Dù Đi, Hoàn Toàn"},
+      {word:"상처", meaning:"Vết Thương, Vết Sước"},
+      {word:"NP 것이 좋다", meaning:"Nên"},
+      {word:"오염되지", meaning:"Ô Nhiễm, Nhiễm Thủy"},
+      {word:"도록", meaning:"Để"},
+      {word:"가입하다", meaning:"Tham Gia"},
+      {word:"회원", meaning:"Thành Viên"},
+      {word:"고장", meaning:"Hư Hỏng"},
+      // 📖 Cột 2
+      {word:"사은품", meaning:"Phần Quà Tặng"},
+      {word:"중요한", meaning:"Quan Trọng"},
+      {word:"보너스", meaning:"Thưởng"},
+      {word:"즉시", meaning:"Ấn Độ"},
+      {word:"여분", meaning:"Phần Mục"},
+      {word:"더", meaning:"Hơn, Thêm"},
+      {word:"보호구", meaning:"Đồ Bảo Hộ"},
+      {word:"착용하다", meaning:"Truyền, Sử Dụng"},
+      {word:"습관", meaning:"Quen"},
+      {word:"선불", meaning:"Mày Tiền"},
+      {word:"파견근로자", meaning:"Người Lao Động Tạm Thời"},
+      {word:"용접", meaning:"Mối Hàn"},
+      {word:"전기", meaning:"Điện"},
+      {word:"NP 기계", meaning:"Tai Nạn, Thiết Bị"},
+      {word:"담다", meaning:"Đảm Nhiệm"},
+      {word:"위해", meaning:"Dành Cho"},
+      {word:"가지", meaning:"Loại, Điều"},
+      {word:"운영하다", meaning:"Vận Hành"},
+      {word:"종류", meaning:"Chủng Loại"},
+      {word:"벼", meaning:"Đất Lúa"},
+      {word:"알리다", meaning:"Thông Báo, Cho Biết"},
+      {word:"불이나 화재", meaning:"Hỏa Hoạn"},
+      {word:"만약", meaning:"Giả Sử"},
+      {word:"강조", meaning:"Nhấn Mạnh"},
+      {word:"시", meaning:"Khi"},
+      {word:"해마다", meaning:"Mỗi Năm"},
+      // 📖 Cột 3
+      {word:"돌아가신", meaning:"Qua Đời"},
+      {word:"제시하다", meaning:"Đưa Ra, Trình Bày"},
+      {word:"모으다", meaning:"Tập Trung"},
+      {word:"전시", meaning:"Triển Lãm"},
+      {word:"나물", meaning:"Rau Cải"},
+      {word:"올리다", meaning:"Đăng Lên"},
+      {word:"과거", meaning:"Quá Khứ"},
+      {word:"명절", meaning:"Ngày Lễ"},
+      {word:"줄다", meaning:"Giảm"},
+      {word:"모이다", meaning:"Tập Trung"},
+      {word:"갈등", meaning:"Mâu Thuẫn"},
+      {word:"손수레", meaning:"Xe Đẩy Tay"},
+      {word:"그물", meaning:"Lưới"},
+      {word:"증상", meaning:"Triệu Chứng"},
+      {word:"물", meaning:"Bình, Tươi, Nước"},
+      {word:"묻다", meaning:"Chôn, Chất Chứa"},
+      {word:"지식", meaning:"Kiến Thức"},
+      {word:"재료", meaning:"Vật Liệu"},
+      {word:"콘크리트", meaning:"Bê Tông"},
+      {word:"속", meaning:"Bên Trong"},
+      {word:"강철", meaning:"Thép"},
+      {word:"철근", meaning:"Sắt"},
+      {word:"벽돌", meaning:"Gạch"},
+      {word:"최속강", meaning:"Cao"},
+      {word:"시멘트", meaning:"Xi Măng"},
+    ];
+
+    let currentIndex = 0;
+    const card = document.getElementById("card");
+    const front = document.getElementById("front");
+    const back = document.getElementById("back");
+    const wordListDiv = document.getElementById("wordList");
+
+    function updateCard() {
+      front.textContent = words[currentIndex].word;
+      back.textContent = words[currentIndex].meaning;
+      card.classList.remove("flip");
+    }
+
+    document.getElementById("flipBtn").addEventListener("click", () => {
+      card.classList.toggle("flip");
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % words.length;
+      updateCard();
+    });
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + words.length) % words.length;
+      updateCard();
+    });
+
+    document.getElementById("showAllBtn").addEventListener("click", () => {
+      if (wordListDiv.style.display === "none") {
+        let html = "<ul>";
+        words.forEach(w => {
+          html += `<li><b>${w.word}</b>: ${w.meaning}</li>`;
+        });
+        html += "</ul>";
+        wordListDiv.innerHTML = html;
+        wordListDiv.style.display = "block";
+      } else {
+        wordListDiv.style.display = "none";
+      }
+    });
+
+    updateCard();
+  </script>
+</body>
+</html>
